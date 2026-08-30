@@ -10,36 +10,25 @@ Offline-first · Zero-knowledge · Serverless · Post-quantum ready · Multi-lan
 
 | Feature | Status |
 |---------|--------|
-| Offline encrypted vault (Argon2id + AES-256-GCM) | ✅ |
-| Passwords / Notes / Bookmarks CRUD | ✅ |
-| Password generator | ✅ |
-| TOTP (2FA) codes | ✅ |
-| Auto-lock + biometric unlock | ✅ |
-| WebDAV E2EE sync (Yandex Disk, Nextcloud…) | ✅ |
-| File export / import (`.enc`) | ✅ |
-| Browser extension (Chrome/Yandex) + autofill | ✅ |
-| Google Drive App Data (scaffold) | 🧩 |
-| Post-quantum hybrid KEM | 📋 |
-| Desktop Native Messaging | 📋 |
+| Offline vault (Argon2id + AES-256-GCM) | ✅ |
+| Passwords / Notes / Bookmarks | ✅ |
+| Password generator + TOTP | ✅ |
+| Auto-lock + biometrics | ✅ |
+| WebDAV E2EE (Yandex, Nextcloud…) | ✅ |
+| Google Drive App Data E2EE | ✅ (needs your OAuth client) |
+| Chrome/Yandex extension + autofill | ✅ |
+| Desktop Native Messaging + local API | ✅ |
+| Hybrid KEM X25519 + ML-KEM-768 API | ✅ |
+| liboqs `.so` shipped in APK | 📋 optional build |
+| Languages RU / EN / BG / TH | ✅ |
 
-Languages: **Russian, English, Bulgarian, Thai**
+## Docs
 
-## Architecture
-
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — crypto & design
-- [docs/SYNC.md](docs/SYNC.md) — WebDAV / file sync
-- [docs/GOOGLE_DRIVE.md](docs/GOOGLE_DRIVE.md) — Drive setup
-- [docs/EXTENSION.md](docs/EXTENSION.md) — browser extension
-
-## Project structure
-
-```
-vrav-pass/
-├── mobile/           # Flutter app
-├── extensions/chrome # MV3 extension
-├── docs/
-└── .github/workflows # APK CI
-```
+- [Architecture](docs/ARCHITECTURE.md)
+- [Sync](docs/SYNC.md) · [Google Drive](docs/GOOGLE_DRIVE.md)
+- [Extension](docs/EXTENSION.md) · [Desktop host](docs/DESKTOP_HOST.md)
+- [PQ crypto](docs/PQ_CRYPTO.md) · [Android liboqs](mobile/android_liboqs/README.md)
+- [Release checklist](docs/RELEASE_CHECKLIST.md)
 
 ## Quick start
 
@@ -47,36 +36,23 @@ vrav-pass/
 git clone https://github.com/zametkikostik/vrav-pass.git
 cd vrav-pass/mobile
 chmod +x scripts/bootstrap.sh && ./scripts/bootstrap.sh
-# or:
-# flutter create . --org com.vravpass --project-name vrav_pass
-# flutter pub get
-flutter run
+flutter run                  # device / emulator
+flutter run -d linux         # desktop bridge for browser host
 ```
-
-Build APK:
 
 ```bash
 flutter build apk --release --split-per-abi
 ```
 
-CI runs the same on every push to `main` (auto `flutter create` if `android/` is absent).
+Extension: `chrome://extensions` → Load unpacked → `extensions/chrome`
 
-## Browser extension
-
-```
-chrome://extensions → Developer mode → Load unpacked → extensions/chrome
-```
-
-See [extensions/chrome/README.md](extensions/chrome/README.md).
-
-## Security model (short)
+## Security (short)
 
 - No Vrav servers
-- Master password → Argon2id → DEK
-- Vault on disk = AES-256-GCM ciphertext only
-- Cloud = same ciphertext
-- Biometric unlock stores DEK in platform secure storage after first password unlock
+- Master password → Argon2id → DEK; disk/cloud = ciphertext only
+- Biometrics wrap DEK in OS secure storage
+- PQ: real only when `liboqs` is present (`isPostQuantumNative`)
 
 ## License
 
-MIT — see [LICENSE](LICENSE)
+MIT — [LICENSE](LICENSE)
