@@ -13,5 +13,15 @@
   "unlock": "ปลดล็อก",
   "create_vault": "สร้างคลัง",
   "master_password": "รหัสผ่านหลัก",
-  "confirm_password": "ยืนยันรหัสผ่าน"
+  "confirm_password": "ยืนยันรหัสผ่าน",
+  "create_vault_hint": "เลือกหัสผ่านหลักที่แข็งแรง รหัสนี้ไม่ถูกส่งไปที่ใดและกู้คืนไม่ได้หากลืม",
+  "create_vault_warning": "หากลืมรหัสผ่านหลัก ข้อมูลทั้งหมดจะสูญหายถาวร",
+  "password_too_short": "อย่างน้อย 8 ตัวอักษร",
+  "passwords_do_not_match": "รหัสผ่านไม่ตรงกัน",
+  "enter_master_password": "กรอกรหัสผ่านหลัก",
+  "wrong_password": "รหัสผ่านหลักไม่ถูกต้อง",
+  "required": "จำเป็น",
+  "vault_unlocked": "ปลดล็อกคลังแล้ว",
+  "vault_ready_hint": "คีย์อยู่ในหน่วยความจำ ขั้นตอนถัดไปคือที่เก็บเข้ารหัสในเครื่อง",
+  "next_step_storage": "ขั้นตอนถัดไป: ที่เก็บเข้ารหัสในเครื่อง + CRUD"
 }
