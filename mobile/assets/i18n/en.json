@@ -40,5 +40,21 @@
   "save": "Save",
   "edit": "Edit",
   "delete": "Delete",
-  "copied": "Copied to clipboard"
+  "copied": "Copied to clipboard",
+  "sync_settings": "Sync & Backup",
+  "sync_e2ee_hint": "Only encrypted ciphertext is uploaded. Your cloud provider never sees passwords.",
+  "webdav": "WebDAV",
+  "webdav_url": "WebDAV URL",
+  "remote_path": "Remote path",
+  "upload": "Upload",
+  "download": "Download",
+  "save_config": "Save settings",
+  "saved": "Saved",
+  "last_sync": "Last sync",
+  "file_export_import": "File export / import",
+  "export": "Export",
+  "import": "Import",
+  "export_ok": "Export ready",
+  "import_ok": "Import successful",
+  "yandex_hint": "Yandex Disk WebDAV: https://webdav.yandex.ru — use your Yandex login and an app password."
 }
