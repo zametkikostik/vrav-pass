@@ -1,61 +1,122 @@
 import 'dart:typed_data';
 
-import 'package:http/http.dart' as http;
+import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sign_in_as_googleapis_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:googleapis/drive/v3.dart' as drive;
 
+import '../config/app_config.dart';
 import 'sync_models.dart';
 
-/// Google Drive App Data folder sync for encrypted vault blob.
+/// E2EE vault blob ↔ Google Drive **appDataFolder**.
 ///
-/// Requires:
-/// 1. Google Cloud Console OAuth client (Android + optional Web)
-/// 2. Packages: google_sign_in, googleapis, extension_google_sign_in_as_googleapis_auth
-/// 3. SHA-1 of signing key registered in Cloud Console
-///
-/// Until credentials are configured, [isConfigured] is false and methods return errors.
-///
-/// Only ciphertext is uploaded (same as WebDAV).
+/// Setup: docs/GOOGLE_DRIVE.md
+/// Client ID: AppConfig.googleServerClientId or --dart-define=GOOGLE_SERVER_CLIENT_ID=
 class GoogleDriveSync {
   GoogleDriveSync({
-    this.clientId,
-  });
+    GoogleSignIn? signIn,
+  }) : _signIn = signIn ??
+            GoogleSignIn(
+              scopes: [drive.DriveApi.driveAppdataScope],
+              serverClientId: AppConfig.hasGoogleOAuth
+                  ? AppConfig.googleServerClientId
+                  : null,
+            );
 
-  /// Optional web client id for some platforms.
-  final String? clientId;
+  final GoogleSignIn _signIn;
+  static const _fileName = 'vault.v1.enc';
 
-  /// Set true after wiring google_sign_in in app.
-  static bool integrationEnabled = false;
+  Future<drive.DriveApi?> _api() async {
+    var account = _signIn.currentUser;
+    account ??= await _signIn.signInSilently();
+    account ??= await _signIn.signIn();
+    if (account == null) return null;
 
-  bool get isConfigured => integrationEnabled && (clientId != null && clientId!.isNotEmpty);
-
-  /// Placeholder: implement with google_sign_in + drive.DriveApi.
-  Future<SyncResult> uploadCipher(Uint8List data, {String fileName = 'vault.v1.enc'}) async {
-    if (!isConfigured) {
-      return SyncResult(
-        success: false,
-        message: 'Google Drive not configured. See docs/GOOGLE_DRIVE.md',
-      );
-    }
-    // Integration point for Drive API media upload to appDataFolder.
-    return SyncResult(success: false, message: 'Wire google_sign_in to enable');
+    final client = await _signIn.authenticatedClient();
+    if (client == null) return null;
+    return drive.DriveApi(client);
   }
 
-  Future<SyncResult> downloadCipher({String fileName = 'vault.v1.enc'}) async {
-    if (!isConfigured) {
-      return SyncResult(
-        success: false,
-        message: 'Google Drive not configured. See docs/GOOGLE_DRIVE.md',
-      );
-    }
-    return SyncResult(success: false, message: 'Wire google_sign_in to enable');
+  Future<String?> _findFileId(drive.DriveApi api) async {
+    final list = await api.files.list(
+      spaces: 'appDataFolder',
+      q: "name = '$_fileName' and trashed = false",
+      $fields: 'files(id, name)',
+    );
+    final files = list.files;
+    if (files == null || files.isEmpty) return null;
+    return files.first.id;
   }
 
-  /// Test network reachability (no auth).
-  Future<bool> pingGoogle() async {
+  Future<SyncResult> uploadCipher(Uint8List data) async {
     try {
-      final res = await http.head(Uri.parse('https://www.googleapis.com'));
-      return res.statusCode < 500;
-    } catch (_) {
-      return false;
+      final api = await _api();
+      if (api == null) {
+        return SyncResult(success: false, message: 'Google sign-in cancelled');
+      }
+
+      final media = drive.Media(
+        Stream<List<int>>.value(data),
+        data.length,
+        contentType: 'application/octet-stream',
+      );
+
+      final existingId = await _findFileId(api);
+      if (existingId != null) {
+        await api.files.update(
+          drive.File()..name = _fileName,
+          existingId,
+          uploadMedia: media,
+        );
+      } else {
+        await api.files.create(
+          drive.File()
+            ..name = _fileName
+            ..parents = ['appDataFolder'],
+          uploadMedia: media,
+        );
+      }
+
+      return SyncResult(
+        success: true,
+        bytes: data.length,
+        message: 'Uploaded to Google Drive (appData)',
+      );
+    } catch (e) {
+      return SyncResult(success: false, message: e.toString());
     }
   }
+
+  Future<SyncResult> downloadCipher() async {
+    try {
+      final bytes = await downloadBytes();
+      if (bytes == null) {
+        return SyncResult(success: false, message: 'Download failed or cancelled');
+      }
+      return SyncResult(
+        success: true,
+        bytes: bytes.length,
+        message: 'Downloaded from Google Drive',
+      );
+    } catch (e) {
+      return SyncResult(success: false, message: e.toString());
+    }
+  }
+
+  Future<Uint8List?> downloadBytes() async {
+    final api = await _api();
+    if (api == null) return null;
+    final id = await _findFileId(api);
+    if (id == null) return null;
+    final media = await api.files.get(
+      id,
+      downloadOptions: drive.DownloadOptions.fullMedia,
+    ) as drive.Media;
+    final chunks = <int>[];
+    await for (final c in media.stream) {
+      chunks.addAll(c);
+    }
+    return Uint8List.fromList(chunks);
+  }
+
+  Future<void> signOut() => _signIn.signOut();
 }
