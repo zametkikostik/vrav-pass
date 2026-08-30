@@ -63,7 +63,9 @@ class _ImportBitwardenScreenState extends ConsumerState<ImportBitwardenScreen> {
         context: context,
         builder: (ctx) => AlertDialog(
           title: Text('import_bitwarden'.tr()),
-          content: Text('import_confirm'.tr(args: ['${items.length}'])),
+          content: Text(
+            '${'import_confirm_prefix'.tr()} ${items.length} ${'import_confirm_suffix'.tr()}',
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),
@@ -84,7 +86,8 @@ class _ImportBitwardenScreenState extends ConsumerState<ImportBitwardenScreen> {
 
       await ref.read(vaultItemsProvider.notifier).importMany(items);
       setState(() {
-        _status = 'import_ok_count'.tr(args: ['${items.length}']);
+        _status =
+            '${'import_ok_prefix'.tr()} ${items.length} ${'import_ok_suffix'.tr()}';
         _busy = false;
       });
     } catch (e) {
