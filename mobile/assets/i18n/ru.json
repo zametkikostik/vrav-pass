@@ -1,0 +1,17 @@
+{
+  "app_title": "Vrav Pass",
+  "welcome_message": "Суверенный менеджер паролей",
+  "tagline": "Оффлайн · Без утечек · Готов к постквантовой эре",
+  "open_vault": "Открыть хранилище",
+  "coming_soon": "Скоро",
+  "passwords": "Пароли",
+  "notes": "Заметки",
+  "bookmarks": "Закладки",
+  "settings": "Настройки",
+  "language": "Язык",
+  "lock": "Заблокировать",
+  "unlock": "Разблокировать",
+  "create_vault": "Создать хранилище",
+  "master_password": "Мастер-пароль",
+  "confirm_password": "Подтвердите пароль"
+}
