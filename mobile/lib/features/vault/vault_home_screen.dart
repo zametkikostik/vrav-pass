@@ -8,6 +8,8 @@ import '../../core/vault/vault_items_provider.dart';
 import '../../core/vault/vault_models.dart';
 import '../auth/unlock_vault_screen.dart';
 import '../home/home_screen.dart';
+import 'add_bookmark_screen.dart';
+import 'add_note_screen.dart';
 import 'add_password_screen.dart';
 
 class VaultHomeScreen extends ConsumerWidget {
@@ -79,7 +81,6 @@ class VaultHomeScreen extends ConsumerWidget {
             );
           }
 
-          // Sort: favorites first, then by title
           final sorted = [...items]..sort((a, b) {
               if (a.favorite != b.favorite) return a.favorite ? -1 : 1;
               return a.title.toLowerCase().compareTo(b.title.toLowerCase());
@@ -88,20 +89,57 @@ class VaultHomeScreen extends ConsumerWidget {
           return ListView.builder(
             itemCount: sorted.length,
             itemBuilder: (context, index) {
-              final item = sorted[index];
-              return _VaultItemTile(item: item);
+              return _VaultItemTile(item: sorted[index]);
             },
           );
         },
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const AddPasswordScreen()),
-          );
-        },
-        icon: const Icon(Icons.add),
-        label: Text('add_password'.tr()),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showAddMenu(context),
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  void _showAddMenu(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.password),
+              title: Text('add_password'.tr()),
+              onTap: () {
+                Navigator.pop(ctx);
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const AddPasswordScreen()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.note_alt_outlined),
+              title: Text('add_note'.tr()),
+              onTap: () {
+                Navigator.pop(ctx);
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const AddNoteScreen()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.bookmark_outline),
+              title: Text('add_bookmark'.tr()),
+              onTap: () {
+                Navigator.pop(ctx);
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const AddBookmarkScreen()),
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -131,12 +169,16 @@ class _VaultItemTile extends ConsumerWidget {
         ? (item as PasswordItem).username ?? (item as PasswordItem).url
         : item is BookmarkItem
             ? (item as BookmarkItem).url
-            : null;
+            : item is NoteItem
+                ? ((item as NoteItem).content.length > 60
+                    ? '${(item as NoteItem).content.substring(0, 60)}…'
+                    : (item as NoteItem).content)
+                : null;
 
     return ListTile(
       leading: CircleAvatar(child: Icon(_icon, size: 20)),
       title: Text(item.title),
-      subtitle: subtitle != null ? Text(subtitle) : null,
+      subtitle: subtitle != null && subtitle.isNotEmpty ? Text(subtitle) : null,
       trailing: item.favorite ? const Icon(Icons.star, color: Colors.amber) : null,
       onTap: () => _showDetail(context, ref),
     );
@@ -157,30 +199,29 @@ class _VaultItemTile extends ConsumerWidget {
               const SizedBox(height: 16),
               if (item is PasswordItem) ..._passwordDetails(ctx, item as PasswordItem),
               if (item is NoteItem)
-                Text((item as NoteItem).content),
-              if (item is BookmarkItem)
-                Text((item as BookmarkItem).url),
+                SelectableText((item as NoteItem).content),
+              if (item is BookmarkItem) ...[
+                _copyRow(ctx, 'url'.tr(), (item as BookmarkItem).url),
+                if ((item as BookmarkItem).description != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text((item as BookmarkItem).description!),
+                  ),
+              ],
               const SizedBox(height: 24),
               Row(
                 children: [
-                  if (item is PasswordItem)
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () {
-                          Navigator.of(ctx).pop();
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => AddPasswordScreen(
-                                existing: item as PasswordItem,
-                              ),
-                            ),
-                          );
-                        },
-                        icon: const Icon(Icons.edit),
-                        label: Text('edit'.tr()),
-                      ),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        Navigator.of(ctx).pop();
+                        _openEdit(context);
+                      },
+                      icon: const Icon(Icons.edit),
+                      label: Text('edit'.tr()),
                     ),
-                  if (item is PasswordItem) const SizedBox(width: 12),
+                  ),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: () async {
@@ -204,10 +245,33 @@ class _VaultItemTile extends ConsumerWidget {
     );
   }
 
+  void _openEdit(BuildContext context) {
+    if (item is PasswordItem) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => AddPasswordScreen(existing: item as PasswordItem),
+        ),
+      );
+    } else if (item is NoteItem) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => AddNoteScreen(existing: item as NoteItem),
+        ),
+      );
+    } else if (item is BookmarkItem) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => AddBookmarkScreen(existing: item as BookmarkItem),
+        ),
+      );
+    }
+  }
+
   List<Widget> _passwordDetails(BuildContext context, PasswordItem p) {
     return [
       if (p.username != null) _copyRow(context, 'username'.tr(), p.username!),
-      if (p.password != null) _copyRow(context, 'password'.tr(), p.password!, secret: true),
+      if (p.password != null)
+        _copyRow(context, 'password'.tr(), p.password!, secret: true),
       if (p.url != null) _copyRow(context, 'url'.tr(), p.url!),
       if (p.notes != null && p.notes!.isNotEmpty) ...[
         const SizedBox(height: 8),
@@ -216,7 +280,8 @@ class _VaultItemTile extends ConsumerWidget {
     ];
   }
 
-  Widget _copyRow(BuildContext context, String label, String value, {bool secret = false}) {
+  Widget _copyRow(BuildContext context, String label, String value,
+      {bool secret = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
