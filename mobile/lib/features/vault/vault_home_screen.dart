@@ -8,6 +8,7 @@ import '../../core/vault/vault_items_provider.dart';
 import '../../core/vault/vault_models.dart';
 import '../auth/unlock_vault_screen.dart';
 import '../home/home_screen.dart';
+import '../settings/sync_settings_screen.dart';
 import 'add_bookmark_screen.dart';
 import 'add_note_screen.dart';
 import 'add_password_screen.dart';
@@ -34,6 +35,15 @@ class VaultHomeScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text('app_title'.tr()),
         actions: [
+          IconButton(
+            tooltip: 'settings'.tr(),
+            icon: const Icon(Icons.cloud_sync_outlined),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const SyncSettingsScreen()),
+              );
+            },
+          ),
           PopupMenuButton<Locale>(
             icon: const Icon(Icons.language),
             onSelected: (locale) => context.setLocale(locale),
