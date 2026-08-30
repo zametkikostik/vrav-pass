@@ -1,0 +1,17 @@
+{
+  "app_title": "Vrav Pass",
+  "welcome_message": "ตัวจัดการรหัสผ่านแบบอธิปไตย",
+  "tagline": "ออฟไลน์เป็นหลัก · ไม่มีข้อมูลรั่วไหล · พร้อมรับมือคอมพิวเตอร์ควอนตัม",
+  "open_vault": "เปิดคลัง",
+  "coming_soon": "เร็วๆ นี้",
+  "passwords": "รหัสผ่าน",
+  "notes": "บันทึก",
+  "bookmarks": "บุ๊กมาร์ก",
+  "settings": "การตั้งค่า",
+  "language": "ภาษา",
+  "lock": "ล็อก",
+  "unlock": "ปลดล็อก",
+  "create_vault": "สร้างคลัง",
+  "master_password": "รหัสผ่านหลัก",
+  "confirm_password": "ยืนยันรหัสผ่าน"
+}
