@@ -2,6 +2,8 @@ const jsonEl = document.getElementById('json');
 const pwdEl = document.getElementById('pwd');
 const btn = document.getElementById('btn-import');
 const msg = document.getElementById('msg');
+const btnHost = document.getElementById('btn-ping-host');
+const hostResult = document.getElementById('host-result');
 
 btn.addEventListener('click', async () => {
   msg.textContent = '';
@@ -11,7 +13,6 @@ btn.addEventListener('click', async () => {
     const password = pwdEl.value;
     if (!password || password.length < 8) throw new Error('Password min 8 chars');
 
-    // Normalize types
     const normalized = items.map((it) => ({
       type: it.type || 'password',
       id: it.id,
@@ -34,5 +35,15 @@ btn.addEventListener('click', async () => {
     pwdEl.value = '';
   } catch (e) {
     msg.textContent = e.message || String(e);
+  }
+});
+
+btnHost.addEventListener('click', async () => {
+  hostResult.textContent = 'Pinging com.vravpass.host…';
+  try {
+    const res = await chrome.runtime.sendMessage({ type: 'pingHost' });
+    hostResult.textContent = JSON.stringify(res, null, 2);
+  } catch (e) {
+    hostResult.textContent = e.message || String(e);
   }
 });
