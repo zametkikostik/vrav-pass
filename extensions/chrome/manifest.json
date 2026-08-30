@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Vrav Pass",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Sovereign password, notes and bookmarks manager. Offline-first, zero-knowledge, E2EE.",
   "action": {
     "default_popup": "popup.html",
@@ -43,5 +43,11 @@
   },
   "content_security_policy": {
     "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "vrav-pass@sovereign.local",
+      "strict_min_version": "121.0"
+    }
   }
 }
