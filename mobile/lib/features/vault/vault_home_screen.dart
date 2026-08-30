@@ -8,6 +8,7 @@ import '../../core/vault/vault_items_provider.dart';
 import '../../core/vault/vault_models.dart';
 import '../auth/unlock_vault_screen.dart';
 import '../home/home_screen.dart';
+import '../settings/security_settings_screen.dart';
 import '../settings/sync_settings_screen.dart';
 import 'add_bookmark_screen.dart';
 import 'add_note_screen.dart';
@@ -21,10 +22,12 @@ class VaultHomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final session = ref.watch(sessionProvider);
 
+    // Auto-lock cleared session → go to unlock
     if (session == null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        Navigator.of(context).pushReplacement(
+        Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (_) => const UnlockVaultScreen()),
+          (route) => false,
         );
       });
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
@@ -36,6 +39,15 @@ class VaultHomeScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text('app_title'.tr()),
         actions: [
+          IconButton(
+            tooltip: 'security'.tr(),
+            icon: const Icon(Icons.shield_outlined),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const SecuritySettingsScreen()),
+              );
+            },
+          ),
           IconButton(
             tooltip: 'settings'.tr(),
             icon: const Icon(Icons.cloud_sync_outlined),
