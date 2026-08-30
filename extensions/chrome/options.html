@@ -9,15 +9,19 @@
     h2 { margin-top: 28px; }
     textarea { width: 100%; min-height: 120px; background: #1e293b; color: #e2e8f0; border-radius: 8px; border: 1px solid #334155; padding: 10px; font-family: monospace; }
     .hint { color: #94a3b8; font-size: 0.85rem; margin: 8px 0 16px; }
+    #host-result { white-space: pre-wrap; font-family: monospace; font-size: 0.8rem; }
   </style>
 </head>
 <body>
   <h1>Vrav Pass Settings</h1>
+
+  <h2>Desktop native host</h2>
   <p class="hint">
-    Import a vault JSON (array of items) and lock it with a password for this browser.
-    For full mobile parity, use the same items exported from the app after unlock
-    (temporary JSON bridge until Argon2 WASM matches mobile KDF).
+    On desktop, the extension can talk to <code>com.vravpass.host</code>.
+    Install host first — see docs/DESKTOP_HOST.md
   </p>
+  <button class="primary" id="btn-ping-host">Test native host</button>
+  <p id="host-result" class="hint"></p>
 
   <h2>Import items (JSON)</h2>
   <p class="hint">Paste JSON array of password items, set password, click Import & Lock.</p>
@@ -28,10 +32,9 @@
 
   <h2>How to sync with mobile</h2>
   <ol class="hint">
-    <li>On phone: unlock Vrav Pass → Sync → Export encrypted file (or WebDAV).</li>
-    <li>On second device / this browser: same master password in mobile app is source of truth.</li>
-    <li>Extension uses its own PBKDF2-locked cache for autofill speed (session-unlocked).</li>
-    <li>Native Messaging (desktop) will connect Flutter host directly in a later version.</li>
+    <li>On phone: unlock Vrav Pass → Sync → Export / WebDAV / Google Drive.</li>
+    <li>Extension local cache: import JSON (temporary bridge).</li>
+    <li>Desktop: Native Messaging host for live vault access.</li>
   </ol>
 
   <script type="module" src="options.js"></script>
