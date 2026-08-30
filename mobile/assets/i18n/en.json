@@ -72,5 +72,19 @@
   "totp_secret": "TOTP secret (2FA)",
   "totp_hint": "Base32 secret from authenticator setup",
   "generate_totp_secret": "Generate secret",
-  "totp_code": "One-time code"
+  "totp_code": "One-time code",
+  "security": "Security",
+  "auto_lock": "Auto-lock",
+  "auto_lock_hint": "Lock vault after inactivity or when app goes to background.",
+  "auto_lock_timeout": "Timeout",
+  "never": "Never",
+  "biometrics": "Biometric unlock",
+  "biometrics_hint": "Unlock with fingerprint or face after first password unlock.",
+  "biometrics_unavailable": "Biometrics not available on this device.",
+  "biometrics_security_note": "Keys are stored in platform secure storage. Master password remains required to enable biometrics and for recovery.",
+  "enable_biometrics_reason": "Confirm to enable biometric unlock",
+  "unlock_biometrics": "Unlock with biometrics",
+  "unlock_with_biometrics": "Unlock Vrav Pass",
+  "biometrics_failed": "Biometric authentication failed",
+  "biometrics_no_key": "No biometric key saved. Unlock with password first."
 }
