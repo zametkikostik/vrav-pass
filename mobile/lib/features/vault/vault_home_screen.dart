@@ -1,9 +1,9 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/session/session_provider.dart';
+import '../../core/util/secure_clipboard.dart';
 import '../../core/vault/vault_items_provider.dart';
 import '../../core/vault/vault_models.dart';
 import '../auth/unlock_vault_screen.dart';
@@ -15,14 +15,49 @@ import 'add_note_screen.dart';
 import 'add_password_screen.dart';
 import 'totp_code_widget.dart';
 
-class VaultHomeScreen extends ConsumerWidget {
+class VaultHomeScreen extends ConsumerStatefulWidget {
   const VaultHomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<VaultHomeScreen> createState() => _VaultHomeScreenState();
+}
+
+class _VaultHomeScreenState extends ConsumerState<VaultHomeScreen> {
+  final _searchCtrl = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  List<VaultItem> _filter(List<VaultItem> items) {
+    final q = _query.trim().toLowerCase();
+    if (q.isEmpty) return items;
+    return items.where((item) {
+      if (item.title.toLowerCase().contains(q)) return true;
+      if (item is PasswordItem) {
+        final u = item.username?.toLowerCase() ?? '';
+        final url = item.url?.toLowerCase() ?? '';
+        final n = item.notes?.toLowerCase() ?? '';
+        return u.contains(q) || url.contains(q) || n.contains(q);
+      }
+      if (item is NoteItem) {
+        return item.content.toLowerCase().contains(q);
+      }
+      if (item is BookmarkItem) {
+        final d = item.description?.toLowerCase() ?? '';
+        return item.url.toLowerCase().contains(q) || d.contains(q);
+      }
+      return false;
+    }).toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final session = ref.watch(sessionProvider);
 
-    // Auto-lock cleared session → go to unlock
     if (session == null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.of(context).pushAndRemoveUntil(
@@ -44,7 +79,8 @@ class VaultHomeScreen extends ConsumerWidget {
             icon: const Icon(Icons.shield_outlined),
             onPressed: () {
               Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const SecuritySettingsScreen()),
+                MaterialPageRoute(
+                    builder: (_) => const SecuritySettingsScreen()),
               );
             },
           ),
@@ -104,16 +140,49 @@ class VaultHomeScreen extends ConsumerWidget {
             );
           }
 
-          final sorted = [...items]..sort((a, b) {
+          final filtered = _filter(items);
+          final sorted = [...filtered]..sort((a, b) {
               if (a.favorite != b.favorite) return a.favorite ? -1 : 1;
               return a.title.toLowerCase().compareTo(b.title.toLowerCase());
             });
 
-          return ListView.builder(
-            itemCount: sorted.length,
-            itemBuilder: (context, index) {
-              return _VaultItemTile(item: sorted[index]);
-            },
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                child: TextField(
+                  controller: _searchCtrl,
+                  decoration: InputDecoration(
+                    hintText: 'search'.tr(),
+                    prefixIcon: const Icon(Icons.search),
+                    suffixIcon: _query.isEmpty
+                        ? null
+                        : IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              _searchCtrl.clear();
+                              setState(() => _query = '');
+                            },
+                          ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    isDense: true,
+                  ),
+                  onChanged: (v) => setState(() => _query = v),
+                ),
+              ),
+              Expanded(
+                child: sorted.isEmpty
+                    ? Center(child: Text('search_empty'.tr()))
+                    : ListView.builder(
+                        itemCount: sorted.length,
+                        itemBuilder: (context, index) {
+                          return _VaultItemTile(item: sorted[index]);
+                        },
+                      ),
+              ),
+            ],
           );
         },
       ),
@@ -202,7 +271,8 @@ class _VaultItemTile extends ConsumerWidget {
       leading: CircleAvatar(child: Icon(_icon, size: 20)),
       title: Text(item.title),
       subtitle: subtitle != null && subtitle.isNotEmpty ? Text(subtitle) : null,
-      trailing: item.favorite ? const Icon(Icons.star, color: Colors.amber) : null,
+      trailing:
+          item.favorite ? const Icon(Icons.star, color: Colors.amber) : null,
       onTap: () => _showDetail(context, ref),
     );
   }
@@ -220,9 +290,9 @@ class _VaultItemTile extends ConsumerWidget {
             children: [
               Text(item.title, style: Theme.of(ctx).textTheme.titleLarge),
               const SizedBox(height: 16),
-              if (item is PasswordItem) ..._passwordDetails(ctx, item as PasswordItem),
-              if (item is NoteItem)
-                SelectableText((item as NoteItem).content),
+              if (item is PasswordItem)
+                ..._passwordDetails(ctx, item as PasswordItem),
+              if (item is NoteItem) SelectableText((item as NoteItem).content),
               if (item is BookmarkItem) ...[
                 _copyRow(ctx, 'url'.tr(), (item as BookmarkItem).url),
                 if ((item as BookmarkItem).description != null)
@@ -248,7 +318,9 @@ class _VaultItemTile extends ConsumerWidget {
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: () async {
-                        await ref.read(vaultItemsProvider.notifier).remove(item.id);
+                        await ref
+                            .read(vaultItemsProvider.notifier)
+                            .remove(item.id);
                         if (ctx.mounted) Navigator.of(ctx).pop();
                       },
                       icon: const Icon(Icons.delete_outline),
@@ -322,11 +394,13 @@ class _VaultItemTile extends ConsumerWidget {
           ),
           IconButton(
             icon: const Icon(Icons.copy),
-            onPressed: () {
-              Clipboard.setData(ClipboardData(text: value));
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('copied'.tr())),
-              );
+            onPressed: () async {
+              await SecureClipboard.copy(value);
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('copied_clears'.tr())),
+                );
+              }
             },
           ),
         ],
