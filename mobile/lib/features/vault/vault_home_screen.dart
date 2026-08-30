@@ -343,8 +343,16 @@ class _VaultItemTile extends ConsumerWidget {
       leading: CircleAvatar(child: Icon(_icon, size: 20)),
       title: Text(item.title),
       subtitle: subtitle != null && subtitle.isNotEmpty ? Text(subtitle) : null,
-      trailing:
-          item.favorite ? const Icon(Icons.star, color: Colors.amber) : null,
+      trailing: IconButton(
+        tooltip: 'favorite'.tr(),
+        icon: Icon(
+          item.favorite ? Icons.star : Icons.star_border,
+          color: item.favorite ? Colors.amber : null,
+        ),
+        onPressed: () {
+          ref.read(vaultItemsProvider.notifier).toggleFavorite(item);
+        },
+      ),
       onTap: () => _showDetail(context, ref),
     );
   }
@@ -360,7 +368,27 @@ class _VaultItemTile extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(item.title, style: Theme.of(ctx).textTheme.titleLarge),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(item.title,
+                        style: Theme.of(ctx).textTheme.titleLarge),
+                  ),
+                  IconButton(
+                    tooltip: 'favorite'.tr(),
+                    icon: Icon(
+                      item.favorite ? Icons.star : Icons.star_border,
+                      color: item.favorite ? Colors.amber : null,
+                    ),
+                    onPressed: () async {
+                      await ref
+                          .read(vaultItemsProvider.notifier)
+                          .toggleFavorite(item);
+                      if (ctx.mounted) Navigator.of(ctx).pop();
+                    },
+                  ),
+                ],
+              ),
               const SizedBox(height: 16),
               if (item is PasswordItem)
                 ..._passwordDetails(ctx, item as PasswordItem),
