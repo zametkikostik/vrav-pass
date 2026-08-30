@@ -8,7 +8,7 @@ import '../../core/vault/vault_items_provider.dart';
 import '../../core/vault/vault_models.dart';
 import '../auth/unlock_vault_screen.dart';
 import '../home/home_screen.dart';
-import '../settings/import_bitwarden_screen.dart';
+import '../settings/import_hub_screen.dart';
 import '../settings/security_settings_screen.dart';
 import '../settings/sync_settings_screen.dart';
 import 'add_bookmark_screen.dart';
@@ -71,6 +71,12 @@ class _VaultHomeScreenState extends ConsumerState<VaultHomeScreen> {
     }).toList();
   }
 
+  void _openImport() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const ImportHubScreen()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final session = ref.watch(sessionProvider);
@@ -92,14 +98,9 @@ class _VaultHomeScreenState extends ConsumerState<VaultHomeScreen> {
         title: Text('app_title'.tr()),
         actions: [
           IconButton(
-            tooltip: 'import_bitwarden'.tr(),
+            tooltip: 'import_hub'.tr(),
             icon: const Icon(Icons.file_download_outlined),
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                    builder: (_) => const ImportBitwardenScreen()),
-              );
-            },
+            onPressed: _openImport,
           ),
           IconButton(
             tooltip: 'security'.tr(),
@@ -163,14 +164,9 @@ class _VaultHomeScreenState extends ConsumerState<VaultHomeScreen> {
                     ),
                     const SizedBox(height: 16),
                     OutlinedButton.icon(
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                              builder: (_) => const ImportBitwardenScreen()),
-                        );
-                      },
+                      onPressed: _openImport,
                       icon: const Icon(Icons.file_download_outlined),
-                      label: Text('import_bitwarden'.tr()),
+                      label: Text('import_hub'.tr()),
                     ),
                   ],
                 ),
@@ -293,13 +289,10 @@ class _VaultHomeScreenState extends ConsumerState<VaultHomeScreen> {
             ),
             ListTile(
               leading: const Icon(Icons.file_download_outlined),
-              title: Text('import_bitwarden'.tr()),
+              title: Text('import_hub'.tr()),
               onTap: () {
                 Navigator.pop(ctx);
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                      builder: (_) => const ImportBitwardenScreen()),
-                );
+                _openImport();
               },
             ),
           ],
