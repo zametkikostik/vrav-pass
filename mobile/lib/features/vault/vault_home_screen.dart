@@ -8,12 +8,15 @@ import '../../core/vault/vault_items_provider.dart';
 import '../../core/vault/vault_models.dart';
 import '../auth/unlock_vault_screen.dart';
 import '../home/home_screen.dart';
+import '../settings/import_bitwarden_screen.dart';
 import '../settings/security_settings_screen.dart';
 import '../settings/sync_settings_screen.dart';
 import 'add_bookmark_screen.dart';
 import 'add_note_screen.dart';
 import 'add_password_screen.dart';
 import 'totp_code_widget.dart';
+
+enum _TypeFilter { all, password, note, bookmark }
 
 class VaultHomeScreen extends ConsumerStatefulWidget {
   const VaultHomeScreen({super.key});
@@ -25,6 +28,7 @@ class VaultHomeScreen extends ConsumerStatefulWidget {
 class _VaultHomeScreenState extends ConsumerState<VaultHomeScreen> {
   final _searchCtrl = TextEditingController();
   String _query = '';
+  _TypeFilter _typeFilter = _TypeFilter.all;
 
   @override
   void dispose() {
@@ -33,9 +37,24 @@ class _VaultHomeScreenState extends ConsumerState<VaultHomeScreen> {
   }
 
   List<VaultItem> _filter(List<VaultItem> items) {
+    var list = items;
+    switch (_typeFilter) {
+      case _TypeFilter.all:
+        break;
+      case _TypeFilter.password:
+        list = list.where((e) => e.type == VaultItemType.password).toList();
+        break;
+      case _TypeFilter.note:
+        list = list.where((e) => e.type == VaultItemType.note).toList();
+        break;
+      case _TypeFilter.bookmark:
+        list = list.where((e) => e.type == VaultItemType.bookmark).toList();
+        break;
+    }
+
     final q = _query.trim().toLowerCase();
-    if (q.isEmpty) return items;
-    return items.where((item) {
+    if (q.isEmpty) return list;
+    return list.where((item) {
       if (item.title.toLowerCase().contains(q)) return true;
       if (item is PasswordItem) {
         final u = item.username?.toLowerCase() ?? '';
@@ -43,9 +62,7 @@ class _VaultHomeScreenState extends ConsumerState<VaultHomeScreen> {
         final n = item.notes?.toLowerCase() ?? '';
         return u.contains(q) || url.contains(q) || n.contains(q);
       }
-      if (item is NoteItem) {
-        return item.content.toLowerCase().contains(q);
-      }
+      if (item is NoteItem) return item.content.toLowerCase().contains(q);
       if (item is BookmarkItem) {
         final d = item.description?.toLowerCase() ?? '';
         return item.url.toLowerCase().contains(q) || d.contains(q);
@@ -74,6 +91,16 @@ class _VaultHomeScreenState extends ConsumerState<VaultHomeScreen> {
       appBar: AppBar(
         title: Text('app_title'.tr()),
         actions: [
+          IconButton(
+            tooltip: 'import_bitwarden'.tr(),
+            icon: const Icon(Icons.file_download_outlined),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                    builder: (_) => const ImportBitwardenScreen()),
+              );
+            },
+          ),
           IconButton(
             tooltip: 'security'.tr(),
             icon: const Icon(Icons.shield_outlined),
@@ -134,6 +161,17 @@ class _VaultHomeScreenState extends ConsumerState<VaultHomeScreen> {
                       style: Theme.of(context).textTheme.titleMedium,
                       textAlign: TextAlign.center,
                     ),
+                    const SizedBox(height: 16),
+                    OutlinedButton.icon(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                              builder: (_) => const ImportBitwardenScreen()),
+                        );
+                      },
+                      icon: const Icon(Icons.file_download_outlined),
+                      label: Text('import_bitwarden'.tr()),
+                    ),
                   ],
                 ),
               ),
@@ -149,7 +187,7 @@ class _VaultHomeScreenState extends ConsumerState<VaultHomeScreen> {
           return Column(
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
                 child: TextField(
                   controller: _searchCtrl,
                   decoration: InputDecoration(
@@ -172,6 +210,18 @@ class _VaultHomeScreenState extends ConsumerState<VaultHomeScreen> {
                   onChanged: (v) => setState(() => _query = v),
                 ),
               ),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Row(
+                  children: [
+                    _chip(_TypeFilter.all, 'filter_all'.tr()),
+                    _chip(_TypeFilter.password, 'passwords'.tr()),
+                    _chip(_TypeFilter.note, 'notes'.tr()),
+                    _chip(_TypeFilter.bookmark, 'bookmarks'.tr()),
+                  ],
+                ),
+              ),
               Expanded(
                 child: sorted.isEmpty
                     ? Center(child: Text('search_empty'.tr()))
@@ -189,6 +239,17 @@ class _VaultHomeScreenState extends ConsumerState<VaultHomeScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddMenu(context),
         child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  Widget _chip(_TypeFilter value, String label) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: FilterChip(
+        label: Text(label),
+        selected: _typeFilter == value,
+        onSelected: (_) => setState(() => _typeFilter = value),
       ),
     );
   }
@@ -227,6 +288,17 @@ class _VaultHomeScreenState extends ConsumerState<VaultHomeScreen> {
                 Navigator.pop(ctx);
                 Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const AddBookmarkScreen()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.file_download_outlined),
+              title: Text('import_bitwarden'.tr()),
+              onTap: () {
+                Navigator.pop(ctx);
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                      builder: (_) => const ImportBitwardenScreen()),
                 );
               },
             ),
