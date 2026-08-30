@@ -47,6 +47,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       appBar: AppBar(
         title: Text('app_title'.tr()),
@@ -64,37 +66,88 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ],
       ),
       body: Center(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: _loading
               ? const CircularProgressIndicator()
               : Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.lock_outline, size: 80),
+                    Icon(
+                      Icons.shield_outlined,
+                      size: 80,
+                      color: theme.colorScheme.primary,
+                    ),
                     const SizedBox(height: 24),
                     Text(
                       'welcome_message'.tr(),
-                      style: Theme.of(context).textTheme.headlineSmall,
+                      style: theme.textTheme.headlineSmall,
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 12),
                     Text(
                       'tagline'.tr(),
-                      style: Theme.of(context).textTheme.bodyLarge,
+                      style: theme.textTheme.bodyLarge,
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 48),
+                    const SizedBox(height: 32),
+                    _OnboardPoint(
+                      icon: Icons.cloud_off_outlined,
+                      text: 'onboard_no_servers'.tr(),
+                    ),
+                    _OnboardPoint(
+                      icon: Icons.lock_outline,
+                      text: 'onboard_encrypted'.tr(),
+                    ),
+                    _OnboardPoint(
+                      icon: Icons.key_outlined,
+                      text: 'onboard_master'.tr(),
+                    ),
+                    const SizedBox(height: 40),
                     FilledButton.icon(
                       onPressed: _open,
-                      icon: Icon(_vaultExists == true ? Icons.lock_open : Icons.vpn_key),
+                      icon: Icon(
+                        _vaultExists == true ? Icons.lock_open : Icons.vpn_key,
+                      ),
                       label: Text(
-                        _vaultExists == true ? 'open_vault'.tr() : 'create_vault'.tr(),
+                        _vaultExists == true
+                            ? 'open_vault'.tr()
+                            : 'create_vault'.tr(),
                       ),
                     ),
+                    if (_vaultExists != true) ...[
+                      const SizedBox(height: 12),
+                      Text(
+                        'onboard_create_hint'.tr(),
+                        style: theme.textTheme.bodySmall,
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
                   ],
                 ),
         ),
+      ),
+    );
+  }
+}
+
+class _OnboardPoint extends StatelessWidget {
+  const _OnboardPoint({required this.icon, required this.text});
+
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 22),
+          const SizedBox(width: 12),
+          Expanded(child: Text(text)),
+        ],
       ),
     );
   }
