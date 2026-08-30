@@ -1,19 +1,27 @@
-# Vrav Pass Browser Extension (Chrome / Chromium / Yandex)
+# Vrav Pass Browser Extension
 
-Manifest V3 · unlock · search · copy · autofill
+Chrome · Chromium · Yandex · Firefox (temporary load)
 
-## Load for development
+Manifest V3 · unlock · search · copy · autofill · native host ping
 
-1. Open `chrome://extensions` (Yandex: `browser://extensions`).
-2. Enable **Developer mode**.
-3. **Load unpacked** → select `extensions/chrome`.
+## Load — Chrome / Yandex
+
+1. `chrome://extensions` or `browser://extensions`
+2. Developer mode → **Load unpacked** → `extensions/chrome`
+
+## Load — Firefox
+
+1. `about:debugging#/runtime/this-firefox`
+2. **Load Temporary Add-on** → `extensions/chrome/manifest.json`
+
+See also [../firefox/README.md](../firefox/README.md).
 
 ## First-time setup
 
-1. Open **Options** (extension details → Extension options).
-2. Paste JSON array of items (from mobile) and set a lock password.
-3. Click **Import & Lock**.
-4. Open popup → enter password → Unlock.
+1. **Options** → paste JSON items + lock password → **Import & Lock**  
+   (or use mobile export / desktop host)
+2. Popup → unlock → autofill on login pages
+3. Optional: **Test native host** (desktop)
 
 ### Example JSON
 
@@ -29,26 +37,22 @@ Manifest V3 · unlock · search · copy · autofill
 ]
 ```
 
-## Features (v0.2)
+## Features (v0.4)
 
-- Master-password unlock (PBKDF2-locked local cache)
-- Session storage (cleared when browser session ends, when available)
-- Search + copy username/password
-- Autofill current tab login form
-- Match passwords by site hostname
+- PBKDF2-locked local cache + session unlock
+- Search, copy, autofill by hostname
+- Native Messaging client (`com.vravpass.host`)
+- Options: import JSON, ping desktop host
+- Gecko id for Firefox temporary installs
 
-## Architecture note
+## Architecture
 
 | Path | Status |
 |------|--------|
-| Extension local encrypted cache | ✅ |
+| Extension encrypted cache | ✅ |
 | Autofill | ✅ basic |
-| Same Argon2id as mobile on `.enc` blob | ⏳ needs Argon2 WASM |
-| Native Messaging ↔ Flutter (desktop) | ⏳ planned |
-| WebDAV direct from extension | ⏳ planned |
+| Native Messaging ↔ Flutter desktop | ✅ when host + app unlocked |
+| Same Argon2id as mobile on `.enc` | ⏳ Argon2 WASM |
+| Signed AMO / Chrome Web Store | ⏳ |
 
-Mobile remains source of truth. Extension cache is for browser autofill convenience.
-
-## Yandex Browser
-
-Same Chromium MV3 package — load unpacked identically.
+Mobile remains source of truth for the vault.
