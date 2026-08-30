@@ -1,8 +1,6 @@
 # Changelog
 
-All notable changes to Vrav Pass are documented here.
-
-## [0.1.0-beta] — 2026-08-30
+## [0.1.0-beta] — 2026-08-31
 
 ### Added
 
@@ -12,19 +10,23 @@ All notable changes to Vrav Pass are documented here.
 - Auto-lock and biometric unlock
 - WebDAV E2EE sync, encrypted file export/import
 - Google Drive App Data sync (optional OAuth client)
-- Chrome/Yandex MV3 extension with autofill and local vault cache
+- Chrome/Yandex MV3 extension with autofill
 - Desktop Native Messaging host + localhost vault API
-- Hybrid KEM scaffold (X25519 + ML-KEM-768 via liboqs FFI or stub)
+- Hybrid KEM scaffold (X25519 + ML-KEM-768 / liboqs FFI)
+- Vault search, type filters, favorites
+- Secure clipboard auto-clear (45s)
+- Import hub: **Bitwarden** JSON/CSV + **Chrome** password CSV
+- Onboarding copy on home screen
 - i18n: Russian, English, Bulgarian, Thai
-- GitHub Actions APK build
+- GitHub Actions APK build + tagged Release workflow
 
 ### Security notes
 
-- Post-quantum path is **not** active unless native liboqs is present
-- Extension JSON import is a temporary bridge (plaintext at import time)
+- Post-quantum path inactive unless native liboqs is present
+- Extension JSON import remains a temporary plaintext bridge
 
 ### Known limitations
 
 - iOS not packaged
-- No Bitwarden import yet
+- Encrypted Bitwarden exports not supported
 - Sync conflicts are manual (upload/download)
