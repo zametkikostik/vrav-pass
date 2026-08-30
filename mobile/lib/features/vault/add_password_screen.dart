@@ -2,8 +2,10 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/util/totp.dart';
 import '../../core/vault/vault_items_provider.dart';
 import '../../core/vault/vault_models.dart';
+import 'password_generator_sheet.dart';
 
 class AddPasswordScreen extends ConsumerStatefulWidget {
   const AddPasswordScreen({super.key, this.existing});
@@ -20,6 +22,7 @@ class _AddPasswordScreenState extends ConsumerState<AddPasswordScreen> {
   late final TextEditingController _username;
   late final TextEditingController _password;
   late final TextEditingController _url;
+  late final TextEditingController _totp;
   late final TextEditingController _notes;
   bool _obscure = true;
   bool _busy = false;
@@ -32,6 +35,7 @@ class _AddPasswordScreenState extends ConsumerState<AddPasswordScreen> {
     _username = TextEditingController(text: e?.username ?? '');
     _password = TextEditingController(text: e?.password ?? '');
     _url = TextEditingController(text: e?.url ?? '');
+    _totp = TextEditingController(text: e?.totpSecret ?? '');
     _notes = TextEditingController(text: e?.notes ?? '');
   }
 
@@ -41,8 +45,19 @@ class _AddPasswordScreenState extends ConsumerState<AddPasswordScreen> {
     _username.dispose();
     _password.dispose();
     _url.dispose();
+    _totp.dispose();
     _notes.dispose();
     super.dispose();
+  }
+
+  Future<void> _openGenerator() async {
+    final pwd = await showPasswordGeneratorSheet(context);
+    if (pwd != null) {
+      setState(() {
+        _password.text = pwd;
+        _obscure = false;
+      });
+    }
   }
 
   Future<void> _save() async {
@@ -55,6 +70,7 @@ class _AddPasswordScreenState extends ConsumerState<AddPasswordScreen> {
         username: _username.text.trim().isEmpty ? null : _username.text.trim(),
         password: _password.text.isEmpty ? null : _password.text,
         url: _url.text.trim().isEmpty ? null : _url.text.trim(),
+        totpSecret: _totp.text.trim().isEmpty ? null : _totp.text.trim().replaceAll(' ', ''),
         notes: _notes.text.trim().isEmpty ? null : _notes.text.trim(),
         createdAt: widget.existing?.createdAt,
         updatedAt: DateTime.now().toUtc(),
@@ -105,9 +121,20 @@ class _AddPasswordScreenState extends ConsumerState<AddPasswordScreen> {
                   obscureText: _obscure,
                   decoration: InputDecoration(
                     labelText: 'password'.tr(),
-                    suffixIcon: IconButton(
-                      icon: Icon(_obscure ? Icons.visibility : Icons.visibility_off),
-                      onPressed: () => setState(() => _obscure = !_obscure),
+                    suffixIcon: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          tooltip: 'generate_password'.tr(),
+                          icon: const Icon(Icons.auto_awesome),
+                          onPressed: _openGenerator,
+                        ),
+                        IconButton(
+                          icon: Icon(
+                              _obscure ? Icons.visibility : Icons.visibility_off),
+                          onPressed: () => setState(() => _obscure = !_obscure),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -116,6 +143,23 @@ class _AddPasswordScreenState extends ConsumerState<AddPasswordScreen> {
                   controller: _url,
                   decoration: InputDecoration(labelText: 'url'.tr()),
                   keyboardType: TextInputType.url,
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _totp,
+                  decoration: InputDecoration(
+                    labelText: 'totp_secret'.tr(),
+                    hintText: 'totp_hint'.tr(),
+                    suffixIcon: IconButton(
+                      tooltip: 'generate_totp_secret'.tr(),
+                      icon: const Icon(Icons.vpn_key),
+                      onPressed: () {
+                        setState(() {
+                          _totp.text = Totp.generateSecret();
+                        });
+                      },
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
