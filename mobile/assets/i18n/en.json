@@ -56,5 +56,8 @@
   "import": "Import",
   "export_ok": "Export ready",
   "import_ok": "Import successful",
-  "yandex_hint": "Yandex Disk WebDAV: https://webdav.yandex.ru — use your Yandex login and an app password."
+  "yandex_hint": "Yandex Disk WebDAV: https://webdav.yandex.ru — use your Yandex login and an app password.",
+  "export_json_extension": "Export JSON for browser",
+  "export_json_ok": "JSON exported",
+  "export_json_warning": "JSON contains plaintext secrets. Use only for one-time import into the extension, then delete the file."
 }
