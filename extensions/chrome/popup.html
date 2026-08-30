@@ -8,10 +8,26 @@
 </head>
 <body>
   <div class="container">
-    <h1>Vrav Pass</h1>
-    <p class="tagline">Sovereign · Offline · Encrypted</p>
-    <div id="status">Loading…</div>
-    <button id="open-app">Open Vault</button>
+    <header>
+      <h1>Vrav Pass</h1>
+      <button id="btn-lock" class="icon-btn" title="Lock" hidden>🔒</button>
+    </header>
+
+    <div id="view-locked">
+      <p class="tagline">Sovereign · Offline · Encrypted</p>
+      <input type="password" id="master-password" placeholder="Master password" />
+      <button id="btn-unlock" class="primary">Unlock</button>
+      <p id="unlock-error" class="error" hidden></p>
+      <a href="options.html" target="_blank" class="link">Settings / Import</a>
+    </div>
+
+    <div id="view-unlocked" hidden>
+      <input type="search" id="search" placeholder="Search…" />
+      <div id="matches-label" class="section-label" hidden>For this site</div>
+      <ul id="matches-list" class="list"></ul>
+      <div class="section-label">All items</div>
+      <ul id="items-list" class="list"></ul>
+    </div>
   </div>
   <script type="module" src="popup.js"></script>
 </body>
