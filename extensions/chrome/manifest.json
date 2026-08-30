@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Vrav Pass",
-  "version": "0.1.0",
-  "description": "Sovereign password, notes and bookmarks manager. Offline-first, zero-knowledge.",
+  "version": "0.2.0",
+  "description": "Sovereign password, notes and bookmarks manager. Offline-first, zero-knowledge, E2EE.",
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
@@ -20,7 +20,8 @@
     "storage",
     "activeTab",
     "scripting",
-    "alarms"
+    "alarms",
+    "clipboardWrite"
   ],
   "host_permissions": [
     "<all_urls>"
@@ -47,5 +48,8 @@
         "mac": "Command+Shift+V"
       }
     }
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
   }
 }
