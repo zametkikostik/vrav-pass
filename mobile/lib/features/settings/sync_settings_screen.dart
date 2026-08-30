@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../core/config/app_config.dart';
 import '../../core/sync/sync_models.dart';
 import '../../core/sync/sync_provider.dart';
 import '../../core/vault/vault_items_provider.dart';
@@ -84,8 +85,7 @@ class _SyncSettingsScreenState extends ConsumerState<SyncSettingsScreen> {
       _busy = true;
       _status = null;
     });
-    final svc = ref.read(syncServiceProvider);
-    final result = await svc!.uploadToWebDav();
+    final result = await ref.read(syncServiceProvider)!.uploadToWebDav();
     setState(() {
       _busy = false;
       _status = result.message;
@@ -99,8 +99,36 @@ class _SyncSettingsScreenState extends ConsumerState<SyncSettingsScreen> {
       _busy = true;
       _status = null;
     });
-    final svc = ref.read(syncServiceProvider);
-    final result = await svc!.downloadFromWebDav();
+    final result = await ref.read(syncServiceProvider)!.downloadFromWebDav();
+    if (result.success) {
+      await ref.read(vaultItemsProvider.notifier).refresh();
+    }
+    setState(() {
+      _busy = false;
+      _status = result.message;
+      if (result.success) _lastSync = DateTime.now().toUtc();
+    });
+  }
+
+  Future<void> _gdriveUpload() async {
+    setState(() {
+      _busy = true;
+      _status = null;
+    });
+    final result = await ref.read(syncServiceProvider)!.uploadToGoogleDrive();
+    setState(() {
+      _busy = false;
+      _status = result.message;
+      if (result.success) _lastSync = DateTime.now().toUtc();
+    });
+  }
+
+  Future<void> _gdriveDownload() async {
+    setState(() {
+      _busy = true;
+      _status = null;
+    });
+    final result = await ref.read(syncServiceProvider)!.downloadFromGoogleDrive();
     if (result.success) {
       await ref.read(vaultItemsProvider.notifier).refresh();
     }
@@ -114,12 +142,8 @@ class _SyncSettingsScreenState extends ConsumerState<SyncSettingsScreen> {
   Future<void> _export() async {
     setState(() => _busy = true);
     try {
-      final svc = ref.read(syncServiceProvider)!;
-      final file = await svc.exportToFile();
-      await Share.shareXFiles(
-        [XFile(file.path)],
-        text: 'Vrav Pass encrypted vault',
-      );
+      final file = await ref.read(syncServiceProvider)!.exportToFile();
+      await Share.shareXFiles([XFile(file.path)], text: 'Vrav Pass encrypted vault');
       setState(() => _status = 'export_ok'.tr());
     } catch (e) {
       setState(() => _status = e.toString());
@@ -129,15 +153,11 @@ class _SyncSettingsScreenState extends ConsumerState<SyncSettingsScreen> {
   }
 
   Future<void> _import() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.any,
-    );
+    final result = await FilePicker.platform.pickFiles(type: FileType.any);
     if (result == null || result.files.single.path == null) return;
-
     setState(() => _busy = true);
     try {
-      final svc = ref.read(syncServiceProvider)!;
-      await svc.importFromFile(File(result.files.single.path!));
+      await ref.read(syncServiceProvider)!.importFromFile(File(result.files.single.path!));
       await ref.read(vaultItemsProvider.notifier).refresh();
       setState(() => _status = 'import_ok'.tr());
     } catch (e) {
@@ -171,12 +191,39 @@ class _SyncSettingsScreenState extends ConsumerState<SyncSettingsScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Text(
-            'sync_e2ee_hint'.tr(),
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
+          Text('sync_e2ee_hint'.tr(), style: Theme.of(context).textTheme.bodyMedium),
           const SizedBox(height: 24),
 
+          Text('Google Drive', style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 8),
+          Text(
+            AppConfig.hasGoogleOAuth
+                ? 'OAuth client configured'
+                : 'Set GOOGLE_SERVER_CLIENT_ID (see docs/GOOGLE_DRIVE.md)',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: _busy ? null : _gdriveUpload,
+                  icon: const Icon(Icons.upload),
+                  label: Text('upload'.tr()),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: FilledButton.tonalIcon(
+                  onPressed: _busy ? null : _gdriveDownload,
+                  icon: const Icon(Icons.download),
+                  label: Text('download'.tr()),
+                ),
+              ),
+            ],
+          ),
+
+          const Divider(height: 40),
           Text('webdav'.tr(), style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
           TextField(
@@ -234,19 +281,14 @@ class _SyncSettingsScreenState extends ConsumerState<SyncSettingsScreen> {
             onPressed: _busy ? null : _saveConfig,
             child: Text('save_config'.tr()),
           ),
-
           if (_lastSync != null) ...[
             const SizedBox(height: 8),
-            Text(
-              '${'last_sync'.tr()}: ${_lastSync!.toLocal()}',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
+            Text('${'last_sync'.tr()}: ${_lastSync!.toLocal()}',
+                style: Theme.of(context).textTheme.bodySmall),
           ],
 
           const Divider(height: 40),
-
-          Text('file_export_import'.tr(),
-              style: Theme.of(context).textTheme.titleMedium),
+          Text('file_export_import'.tr(), style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 12),
           Row(
             children: [
@@ -279,19 +321,14 @@ class _SyncSettingsScreenState extends ConsumerState<SyncSettingsScreen> {
                   color: Theme.of(context).colorScheme.error,
                 ),
           ),
-
           if (_busy) ...[
             const SizedBox(height: 24),
             const Center(child: CircularProgressIndicator()),
           ],
           if (_status != null) ...[
             const SizedBox(height: 16),
-            Text(
-              _status!,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
+            Text(_status!, style: Theme.of(context).textTheme.bodySmall),
           ],
-
           const SizedBox(height: 32),
           Text(
             'yandex_hint'.tr(),
