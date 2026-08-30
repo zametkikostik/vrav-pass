@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'core/desktop/desktop_bridge.dart';
 import 'core/session/auto_lock_controller.dart';
 import 'core/session/session_provider.dart';
 import 'core/theme/app_theme.dart';
@@ -13,13 +14,13 @@ class VravPassApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Ensure auto-lock controller is created and observes lifecycle
     ref.watch(autoLockProvider);
+    // Desktop: local API for native messaging host
+    ref.watch(desktopBridgeProvider);
 
-    // When session becomes null while on a vault route, user must re-unlock
     ref.listen(sessionProvider, (prev, next) {
       if (prev != null && next == null) {
-        // Navigating from lock is handled by screens; no-op here
+        // lock handled by screens
       }
     });
 
@@ -40,7 +41,6 @@ class VravPassApp extends ConsumerWidget {
         );
       },
       home: const HomeScreen(),
-      // Named route helper for re-lock navigation from anywhere
       routes: {
         '/unlock': (_) => const UnlockVaultScreen(),
       },
