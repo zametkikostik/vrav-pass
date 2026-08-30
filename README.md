@@ -8,7 +8,7 @@ Offline-first · Zero-knowledge · No our servers · Your cloud, your keys
 
 > **Status:** public **beta** (v0.1). Suitable for self-hosting enthusiasts and careful daily use.  
 > Read [Security](#security-model) before storing high-value credentials.  
-> **Русский:** краткое описание ниже → [На русском](#на-русском).
+> **Русский:** [На русском](#на-русском) · [Руководство пользователя](docs/USER_GUIDE.md)
 
 ---
 
@@ -58,7 +58,7 @@ Master password
 - **In cloud:** same blob; provider never gets plaintext from us
 - **In memory:** keys while unlocked; auto-lock + optional biometrics
 - **Threats we design for:** stolen phone backup, honest-but-curious cloud, casual malware
-- **Threats we don’t fully stop alone:** targeted malware with root, evil keyboard, you reusing the master password elsewhere
+- **Threats we don’t fully stop alone:** targeted malware with root, evil keyboard, reusing the master password elsewhere
 
 Report vulnerabilities: see [SECURITY.md](SECURITY.md).
 
@@ -81,7 +81,7 @@ Release APK:
 flutter build apk --release --split-per-abi
 ```
 
-CI builds APK on every push to `main` (Artifacts / Actions).
+CI builds APK on every push to `main`. **Tagged releases** (`v0.1.0`) publish APKs to GitHub Releases.
 
 ### Browser extension
 
@@ -98,6 +98,8 @@ cd ../desktop/native_host
 ```
 
 Details: [docs/DESKTOP_HOST.md](docs/DESKTOP_HOST.md).
+
+End users: [docs/USER_GUIDE.md](docs/USER_GUIDE.md).
 
 ---
 
@@ -125,14 +127,15 @@ vrav-pass/
 ├── mobile/              # Flutter app (Android + desktop targets)
 ├── extensions/chrome/   # Manifest V3 extension
 ├── desktop/native_host/ # Native Messaging host
-├── docs/                # Architecture, sync, security notes
-└── .github/workflows/   # APK CI
+├── docs/                # Architecture, sync, user guide
+└── .github/workflows/   # APK CI + tagged releases
 ```
 
 ## Documentation
 
 | Doc | Topic |
 |-----|--------|
+| [USER_GUIDE.md](docs/USER_GUIDE.md) | How to use (EN + RU) |
 | [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Design & crypto |
 | [SYNC.md](docs/SYNC.md) | WebDAV / files |
 | [GOOGLE_DRIVE.md](docs/GOOGLE_DRIVE.md) | Drive OAuth |
@@ -162,6 +165,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md). Issues and PRs welcome.
 - Языки: русский, English, български, ไทย.
 
 **Важно:** забыли мастер-пароль — данные не восстановить. Это не облачный «восстановим через email».  
-**Статус:** публичная бета. Для повседневного использования — осознанно; для ядерной кнопки — дождитесь аудита и стабильного v1.
+**Статус:** публичная бета. Для повседневного использования — осознанно; критичные сценарии — после стабилизации v1 и при желании аудита.
 
-Установка для разработчиков — в разделе **Quick start** выше. Вопросы и баги — GitHub Issues.
+Как пользоваться: [docs/USER_GUIDE.md](docs/USER_GUIDE.md).  
+Установка для разработчиков — **Quick start** выше. Баги — GitHub Issues.
