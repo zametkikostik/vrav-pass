@@ -1,7 +1,7 @@
 name: vrav_pass
 description: Sovereign offline-first password, notes and bookmarks manager with post-quantum ready crypto.
 publish_to: 'none'
-version: 0.1.0+1
+version: 0.1.0-beta+1
 
 environment:
   sdk: '>=3.5.0 <4.0.0'
