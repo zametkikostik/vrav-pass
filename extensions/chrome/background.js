@@ -6,6 +6,7 @@ import {
   storeLockedBlob,
   lockItemsWithPassword,
 } from './lib/vault.js';
+import { hostFindForUrl, hostStatus, pingHost } from './lib/native_host.js';
 
 chrome.runtime.onInstalled.addListener(() => {
   console.log('Vrav Pass extension installed');
@@ -21,11 +22,41 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 async function handleMessage(message) {
   switch (message?.type) {
     case 'ping':
-      return { ok: true, version: '0.2.0' };
+      return { ok: true, version: '0.3.0' };
+
+    case 'pingHost': {
+      try {
+        const r = await pingHost();
+        return { ok: true, host: r };
+      } catch (e) {
+        return { ok: false, error: e.message || String(e) };
+      }
+    }
+
+    case 'hostStatus': {
+      try {
+        const r = await hostStatus();
+        return { ok: true, host: r };
+      } catch (e) {
+        return { ok: false, error: e.message || String(e) };
+      }
+    }
 
     case 'getStatus': {
       const items = await getSessionItems();
-      return { ok: true, unlocked: !!items, count: items ? items.length : 0 };
+      let host = null;
+      try {
+        host = await hostStatus();
+      } catch (_) {
+        /* host optional */
+      }
+      return {
+        ok: true,
+        unlocked: !!items,
+        count: items ? items.length : 0,
+        hostConnected: !!(host && host.ok),
+        host,
+      };
     }
 
     case 'unlock': {
@@ -45,10 +76,19 @@ async function handleMessage(message) {
     }
 
     case 'findForTab': {
+      // Prefer desktop host when available; fall back to extension cache
+      try {
+        const host = await hostFindForUrl(message.url);
+        if (host?.ok && Array.isArray(host.matches) && host.matches.length) {
+          return { ok: true, matches: host.matches, source: 'host' };
+        }
+      } catch (_) {
+        /* fall through */
+      }
       const items = await getSessionItems();
       if (!items) return { ok: false, error: 'locked' };
       const matches = findForUrl(items, message.url);
-      return { ok: true, matches };
+      return { ok: true, matches, source: 'extension' };
     }
 
     case 'importBlob': {
