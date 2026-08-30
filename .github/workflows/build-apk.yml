@@ -34,6 +34,13 @@ jobs:
       - name: Flutter doctor
         run: flutter doctor -v
 
+      - name: Ensure platform folders
+        run: |
+          if [ ! -d android ]; then
+            echo "android/ missing — running flutter create"
+            flutter create . --org com.vravpass --project-name vrav_pass --platforms=android
+          fi
+
       - name: Get dependencies
         run: flutter pub get
 
