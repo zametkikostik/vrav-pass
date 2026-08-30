@@ -4,50 +4,60 @@
 
 ### First run
 1. Install the app (APK from Releases or build yourself).
-2. **Create vault** → choose a strong master password (you will not be able to reset it).
-3. Add passwords / notes / bookmarks with **+**.
+2. **Create vault** → strong master password (cannot be reset).
+3. Add items with **+**, or **Import** (Bitwarden / Chrome).
 
 ### Daily use
-- **Unlock** with master password or biometrics (after enabling in Security).
-- Tap an item → copy username/password / view TOTP.
-- **Lock** from the toolbar when you step away.
+- Unlock with password or biometrics.
+- Search and filter by type; star favorites.
+- Copy fields — clipboard clears after ~45s.
+- **Lock** when you leave the phone.
 
 ### Backup
-1. Unlock → Sync / Backup.
-2. **Export** encrypted `.enc` file → store on USB or another drive.
-3. To restore: **Import** that file (same master password).
+1. Sync → **Export** `.enc` → keep a copy offline.
+2. Restore: **Import** that file (same master password).
 
-### Sync between phones
-1. Configure **WebDAV** (e.g. Yandex Disk: `https://webdav.yandex.ru` + app password).
-2. Device A: **Upload**. Device B: same master password → **Download**.
+### Sync phones
+WebDAV (e.g. Yandex Disk) → **Upload** on A → **Download** on B (same master password).
 
-### Browser
-- Install the extension from `extensions/chrome` (developer mode).
-- Prefer desktop native host when on Linux; JSON import is only a temporary bridge.
+### Import from Chrome
+Chrome → Settings → Passwords → ⋮ → Export → CSV → Vrav Pass → Import → Chrome.
+
+### Import from Bitwarden
+Bitwarden → Export **unencrypted** JSON/CSV → Import → Bitwarden.
+
+### Browser extension
+- Chrome/Yandex: load `extensions/chrome` unpacked.
+- Firefox: temporary add-on → same `manifest.json`.
+- Options: import JSON or use desktop native host.
 
 ---
 
 ## Русский
 
 ### Первый запуск
-1. Установите приложение (APK из Releases или сборка).
-2. **Создать хранилище** → придумайте надёжный мастер-пароль (восстановить его нельзя).
-3. Добавляйте пароли / заметки / закладки кнопкой **+**.
+1. Установите APK (Releases или своя сборка).
+2. **Создать хранилище** → надёжный мастер-пароль (сбросить нельзя).
+3. Добавляйте записи **+** или **Импорт** (Bitwarden / Chrome).
 
 ### Каждый день
-- **Разблокировка** мастер-паролем или биометрией (включить в «Безопасность»).
-- Тап по записи → копировать логин/пароль / код TOTP.
-- **Блокировка** из панели, когда отошли.
+- Разблокировка паролем или биометрией.
+- Поиск, фильтры, избранное ★.
+- Копирование — буфер очищается ~через 45 с.
+- **Блокировка**, когда отошли.
 
 ### Резервная копия
-1. Разблокировать → Синхронизация.
-2. **Экспорт** файла `.enc` → сохранить отдельно.
-3. Восстановление: **Импорт** того же файла (тот же мастер-пароль).
+Экспорт `.enc` → храните отдельно. Импорт того же файла с тем же мастер-паролем.
 
-### Синхронизация между телефонами
-1. Настроить **WebDAV** (Яндекс.Диск: `https://webdav.yandex.ru` + пароль приложения).
-2. Устройство A: **Выгрузить**. Устройство B: тот же мастер-пароль → **Скачать**.
+### Синхронизация
+WebDAV → **Выгрузить** / **Скачать** на втором устройстве.
 
-### Браузер
-- Расширение: `extensions/chrome` (режим разработчика).
-- На Linux удобнее native host; JSON-импорт — временный мост.
+### Импорт Chrome
+Chrome → Пароли → ⋮ → Экспорт → CSV → в приложении Импорт → Chrome.
+
+### Импорт Bitwarden
+Экспорт **без шифрования** JSON/CSV → Импорт → Bitwarden.
+
+### Расширение
+Chrome/Yandex — unpacked `extensions/chrome`.  
+Firefox — временное дополнение, тот же `manifest.json`.
