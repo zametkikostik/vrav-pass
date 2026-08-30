@@ -1,0 +1,22 @@
+# Example: place as android/app/src/main/cpp/CMakeLists.txt
+# and set externalNativeBuild { cmake { path ... } } in build.gradle.
+#
+# Assumes liboqs sources or prebuilt at third_party/liboqs
+
+cmake_minimum_required(VERSION 3.18)
+project(vrav_oqs_loader)
+
+add_library(vrav_oqs_loader SHARED vrav_oqs_loader.c)
+
+# If using a prebuilt:
+# add_library(oqs SHARED IMPORTED)
+# set_target_properties(oqs PROPERTIES IMPORTED_LOCATION
+#   ${CMAKE_SOURCE_DIR}/../jniLibs/${ANDROID_ABI}/liboqs.so)
+# target_link_libraries(vrav_oqs_loader oqs log)
+
+# If building liboqs as subdirectory:
+# add_subdirectory(${CMAKE_SOURCE_DIR}/../../../../third_party/liboqs liboqs_build)
+# target_link_libraries(vrav_oqs_loader oqs log)
+
+find_library(log-lib log)
+target_link_libraries(vrav_oqs_loader ${log-lib})
