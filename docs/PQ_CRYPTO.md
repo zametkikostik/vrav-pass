@@ -2,39 +2,54 @@
 
 ## Design
 
-Hybrid KEM (see `mobile/lib/core/crypto/hybrid_kem.dart`):
+Hybrid KEM (`mobile/lib/core/crypto/hybrid_kem.dart`):
 
 ```
 ss = HKDF-SHA512( ss_X25519 || ss_ML-KEM-768 )
 ```
 
-- Classical: **X25519** (via `package:cryptography`) — production ready
-- PQ: **ML-KEM-768** (Kyber) — interface ready, real impl pending
+## Code layout
 
-## Current status
+```
+mobile/lib/core/crypto/pq/
+  ml_kem_interface.dart   # FIPS 203 sizes + API
+  ml_kem_stub.dart        # NOT quantum-safe (CI / no liboqs)
+  ml_kem_ffi.dart         # liboqs OQS_KEM_* bindings
+  ml_kem_adapter.dart     # → PostQuantumKem
+  pq_factory.dart         # try FFI, else stub
+```
 
 | Component | Status |
 |-----------|--------|
-| X25519 ECDH | ✅ |
-| Hybrid API + HKDF combine | ✅ |
-| `PostQuantumKem` interface | ✅ |
-| Placeholder PQ (NOT quantum-safe) | ⚠️ structural only |
-| Real ML-KEM-768 | 📋 liboqs FFI or pure-Dart |
+| X25519 | ✅ production |
+| Hybrid + HKDF | ✅ |
+| ML-KEM API + sizes | ✅ |
+| liboqs FFI scaffold | ✅ |
+| Stub fallback | ✅ |
+| Prebuilt liboqs in APK/desktop | 📋 you build & ship |
 
-`PlaceholderPqKem.isRealImplementation == false` — do not claim PQ security yet.
+`isPostQuantumNative` / `MlKem768.isNative` is **true** only when `liboqs` loads.
 
-## Enabling real ML-KEM
+## Build liboqs (Linux example)
 
-Options:
+```bash
+git clone https://github.com/open-quantum-safe/liboqs.git
+cd liboqs && mkdir build && cd build
+cmake -DCMAKE_BUILD_TYPE=Release -DOQS_USE_OPENSSL=ON ..
+make -j"$(nproc)"
+# produces liboqs.so → copy next to app or set LD_LIBRARY_PATH
+```
 
-1. **liboqs** via Dart FFI (recommended for production)
-2. Pure-Dart ML-KEM when a audited package appears
-3. Platform channels to native PQ libs on Android/iOS
+Android: build with NDK and place `liboqs.so` under `android/app/src/main/jniLibs/<abi>/`.
 
-Wire a class `MlKem768` implementing `PostQuantumKem` and pass it to `HybridKem(pq: MlKem768())`.
+## Usage
 
-## Where hybrid KEM will be used
+```dart
+import 'package:vrav_pass/core/crypto/pq/pq_factory.dart';
 
-- Multi-device pairing / recovery shares (future)
-- Secure sharing links between users (future)
-- Not required for local Argon2id + AES-GCM vault (symmetric)
+final hybrid = createHybridKem();
+final kp = await hybrid.generateKeyPair();
+// encapsulate / decapsulate…
+```
+
+Local vault (Argon2id + AES-GCM) does **not** require PQ; hybrid KEM is for future pairing / sharing.
