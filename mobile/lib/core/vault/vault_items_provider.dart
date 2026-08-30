@@ -55,6 +55,10 @@ class VaultItemsNotifier extends AsyncNotifier<List<VaultItem>> {
     await refresh();
   }
 
+  Future<void> toggleFavorite(VaultItem item) async {
+    await updateItem(withFavoriteToggled(item));
+  }
+
   Future<void> remove(String id) async {
     final repo = ref.read(vaultRepositoryProvider);
     if (repo == null) return;
