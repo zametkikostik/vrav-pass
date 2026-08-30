@@ -9,6 +9,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../core/sync/sync_models.dart';
 import '../../core/sync/sync_provider.dart';
 import '../../core/vault/vault_items_provider.dart';
+import 'export_json_helper.dart';
 
 class SyncSettingsScreen extends ConsumerStatefulWidget {
   const SyncSettingsScreen({super.key});
@@ -146,6 +147,19 @@ class _SyncSettingsScreenState extends ConsumerState<SyncSettingsScreen> {
     }
   }
 
+  Future<void> _exportJson() async {
+    setState(() => _busy = true);
+    try {
+      final items = ref.read(vaultItemsProvider).valueOrNull ?? [];
+      await exportItemsAsJson(items);
+      setState(() => _status = 'export_json_ok'.tr());
+    } catch (e) {
+      setState(() => _status = e.toString());
+    } finally {
+      setState(() => _busy = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_loading) {
@@ -252,6 +266,18 @@ class _SyncSettingsScreenState extends ConsumerState<SyncSettingsScreen> {
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: _busy ? null : _exportJson,
+            icon: const Icon(Icons.data_object),
+            label: Text('export_json_extension'.tr()),
+          ),
+          Text(
+            'export_json_warning'.tr(),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.error,
+                ),
           ),
 
           if (_busy) ...[
