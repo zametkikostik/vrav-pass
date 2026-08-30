@@ -59,5 +59,18 @@
   "yandex_hint": "Yandex Disk WebDAV: https://webdav.yandex.ru — use your Yandex login and an app password.",
   "export_json_extension": "Export JSON for browser",
   "export_json_ok": "JSON exported",
-  "export_json_warning": "JSON contains plaintext secrets. Use only for one-time import into the extension, then delete the file."
+  "export_json_warning": "JSON contains plaintext secrets. Use only for one-time import into the extension, then delete the file.",
+  "generate_password": "Generate password",
+  "use_password": "Use",
+  "regenerate": "Regenerate",
+  "length": "Length",
+  "lowercase": "Lowercase",
+  "uppercase": "Uppercase",
+  "digits": "Digits",
+  "symbols": "Symbols",
+  "entropy": "Entropy",
+  "totp_secret": "TOTP secret (2FA)",
+  "totp_hint": "Base32 secret from authenticator setup",
+  "generate_totp_secret": "Generate secret",
+  "totp_code": "One-time code"
 }
