@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Vrav Pass",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Sovereign password, notes and bookmarks manager. Offline-first, zero-knowledge, E2EE.",
   "action": {
     "default_popup": "popup.html",
@@ -12,7 +12,8 @@
     "activeTab",
     "scripting",
     "alarms",
-    "clipboardWrite"
+    "clipboardWrite",
+    "nativeMessaging"
   ],
   "host_permissions": [
     "<all_urls>"
