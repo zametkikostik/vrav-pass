@@ -1,0 +1,17 @@
+{
+  "app_title": "Vrav Pass",
+  "welcome_message": "Sovereign Password Manager",
+  "tagline": "Offline-first · Zero-knowledge · Post-quantum ready",
+  "open_vault": "Open Vault",
+  "coming_soon": "Coming soon",
+  "passwords": "Passwords",
+  "notes": "Notes",
+  "bookmarks": "Bookmarks",
+  "settings": "Settings",
+  "language": "Language",
+  "lock": "Lock",
+  "unlock": "Unlock",
+  "create_vault": "Create Vault",
+  "master_password": "Master Password",
+  "confirm_password": "Confirm Password"
+}
