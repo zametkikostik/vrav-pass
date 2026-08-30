@@ -40,6 +40,14 @@ class VaultItemsNotifier extends AsyncNotifier<List<VaultItem>> {
     await refresh();
   }
 
+  Future<void> importMany(List<VaultItem> newItems, {bool merge = true}) async {
+    final repo = ref.read(vaultRepositoryProvider);
+    if (repo == null || newItems.isEmpty) return;
+    final existing = merge ? await repo.loadAll() : <VaultItem>[];
+    await repo.saveAll([...existing, ...newItems]);
+    await refresh();
+  }
+
   Future<void> updateItem(VaultItem item) async {
     final repo = ref.read(vaultRepositoryProvider);
     if (repo == null) return;
