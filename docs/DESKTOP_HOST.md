@@ -1,48 +1,49 @@
 # Desktop Native Messaging Host
 
-On **desktop**, Chrome can talk to a local host over stdio. This is the preferred path for autofill without exporting JSON.
+Chrome ↔ local host over stdio. Preferred path for desktop autofill.
+
+## Quick install (Linux)
+
+1. Load unpacked extension → copy **Extension ID** from `chrome://extensions`
+2. ```bash
+   cd desktop/native_host
+   chmod +x install_linux.sh vrav_host.py
+   ./install_linux.sh YOUR_EXTENSION_ID
+   ```
+3. Reload extension → **Options → Test native host**
+
+Expected response: `{ "ok": true, "host": { "ok": true, "version": "0.1.0-host" } }`
 
 ## Components
 
 | Piece | Path |
 |-------|------|
-| Host script (prototype) | `desktop/native_host/vrav_host.py` |
-| Host manifest template | `desktop/native_host/com.vravpass.host.json` |
-| Extension | `extensions/chrome` |
+| Host script | `desktop/native_host/vrav_host.py` |
+| Manifest template | `desktop/native_host/com.vravpass.host.json` |
+| Install script | `desktop/native_host/install_linux.sh` |
+| Extension client | `extensions/chrome/lib/native_host.js` |
 
-## Install host (Linux example)
+## Protocol
 
-1. Make script executable:
-   ```bash
-   chmod +x desktop/native_host/vrav_host.py
-   ```
-2. Copy manifest to Chrome's NativeMessagingHosts:
-   ```bash
-   # Edit path + extension id first
-   mkdir -p ~/.config/google-chrome/NativeMessagingHosts
-   cp desktop/native_host/com.vravpass.host.json \
-      ~/.config/google-chrome/NativeMessagingHosts/
-   ```
-3. Set absolute `path` to `vrav_host.py` and `allowed_origins` to your extension ID (`chrome://extensions`).
+| type | direction | response |
+|------|-----------|----------|
+| `ping` | ext→host | `{ok, version}` |
+| `getStatus` | ext→host | `{ok, unlocked, …}` |
+| `findForUrl` | ext→host | `{ok, matches: [...]}` |
 
-Windows: registry key  
+Extension `findForTab` tries host first, then local cache.
+
+## Windows
+
+Create registry value:
+
 `HKCU\Software\Google\Chrome\NativeMessagingHosts\com.vravpass.host`
 
-## Extension side
-
-Add to `manifest.json`:
-
-```json
-"permissions": ["nativeMessaging"]
-```
-
-```js
-chrome.runtime.sendNativeMessage('com.vravpass.host', { type: 'ping' }, console.log);
-```
+= full path to `com.vravpass.host.json` (edit `path` inside to `vrav_host.py` or a `.bat` wrapper).
 
 ## Roadmap
 
-1. ✅ stdio host prototype (ping/status)
-2. ⏳ Flutter Linux/Windows/macOS desktop app as vault process
-3. ⏳ Host asks Flutter over local socket for `findForUrl`
-4. ⏳ Never send full vault to extension — only fill payloads for active tab
+1. ✅ stdio host + extension client + install script
+2. ⏳ Flutter desktop app holds unlocked vault
+3. ⏳ Host queries Flutter (local socket) for `findForUrl`
+4. ⏳ Return only credentials for active tab domain
