@@ -23,5 +23,16 @@
   "required": "Required",
   "vault_unlocked": "Vault unlocked",
   "vault_ready_hint": "Your keys are in memory. Next we will add encrypted local storage.",
-  "next_step_storage": "Next step: local encrypted storage + CRUD"
+  "next_step_storage": "Next step: local encrypted storage + CRUD",
+  "vault_empty": "Vault is empty. Add your first password.",
+  "add_password": "Add password",
+  "edit_password": "Edit password",
+  "title": "Title",
+  "username": "Username",
+  "password": "Password",
+  "url": "URL",
+  "save": "Save",
+  "edit": "Edit",
+  "delete": "Delete",
+  "copied": "Copied to clipboard"
 }
