@@ -1,49 +1,58 @@
 # Desktop Native Messaging Host
 
-Chrome ↔ local host over stdio. Preferred path for desktop autofill.
+Flow:
+
+```
+Chrome extension  →  Native Host (Python)  →  Flutter LocalVaultServer (127.0.0.1)
+```
 
 ## Quick install (Linux)
 
-1. Load unpacked extension → copy **Extension ID** from `chrome://extensions`
+1. Load unpacked extension → copy **Extension ID**
 2. ```bash
    cd desktop/native_host
    chmod +x install_linux.sh vrav_host.py
    ./install_linux.sh YOUR_EXTENSION_ID
    ```
-3. Reload extension → **Options → Test native host**
+3. Run desktop app and **unlock** vault:
+   ```bash
+   cd mobile
+   flutter create . --platforms=linux,windows,macos
+   flutter run -d linux   # or windows / macos
+   ```
+4. Options → **Test native host** → should show `desktop: true`
 
-Expected response: `{ "ok": true, "host": { "ok": true, "version": "0.1.0-host" } }`
+## Local API (Flutter)
 
-## Components
+On unlock, desktop app:
 
-| Piece | Path |
-|-------|------|
-| Host script | `desktop/native_host/vrav_host.py` |
-| Manifest template | `desktop/native_host/com.vravpass.host.json` |
-| Install script | `desktop/native_host/install_linux.sh` |
-| Extension client | `extensions/chrome/lib/native_host.js` |
+- Binds `http://127.0.0.1:17321`
+- Writes `~/.config/vrav-pass/desktop-api.json` with `{port, token}`
+- Requires `Authorization: Bearer <token>`
 
-## Protocol
+Endpoints:
 
-| type | direction | response |
-|------|-----------|----------|
-| `ping` | ext→host | `{ok, version}` |
-| `getStatus` | ext→host | `{ok, unlocked, …}` |
-| `findForUrl` | ext→host | `{ok, matches: [...]}` |
+| Path | Result |
+|------|--------|
+| `GET /ping` | service alive |
+| `GET /status` | unlocked |
+| `GET /find?url=` | matching passwords |
 
-Extension `findForTab` tries host first, then local cache.
+On lock, server stops and config file is deleted.
 
-## Windows
+## Protocol (extension ↔ host)
 
-Create registry value:
+| type | response |
+|------|----------|
+| `ping` | host version + desktop connectivity |
+| `getStatus` | unlocked if Flutter API up |
+| `findForUrl` | matches from desktop vault |
 
-`HKCU\Software\Google\Chrome\NativeMessagingHosts\com.vravpass.host`
+Extension falls back to its own encrypted cache if host/desktop offline.
 
-= full path to `com.vravpass.host.json` (edit `path` inside to `vrav_host.py` or a `.bat` wrapper).
+## Security notes
 
-## Roadmap
-
-1. ✅ stdio host + extension client + install script
-2. ⏳ Flutter desktop app holds unlocked vault
-3. ⏳ Host queries Flutter (local socket) for `findForUrl`
-4. ⏳ Return only credentials for active tab domain
+- API is **loopback only**
+- Random bearer token per unlock session
+- Token never sent to Google/our servers
+- Host is local stdio only (Chrome policy)
