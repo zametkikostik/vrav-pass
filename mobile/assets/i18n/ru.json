@@ -56,5 +56,8 @@
   "import": "Импорт",
   "export_ok": "Экспорт готов",
   "import_ok": "Импорт успешен",
-  "yandex_hint": "Яндекс.Диск WebDAV: https://webdav.yandex.ru — логин Яндекса и пароль приложения."
+  "yandex_hint": "Яндекс.Диск WebDAV: https://webdav.yandex.ru — логин Яндекса и пароль приложения.",
+  "export_json_extension": "Экспорт JSON для браузера",
+  "export_json_ok": "JSON экспортирован",
+  "export_json_warning": "JSON содержит пароли в открытом виде. Только для разового импорта в расширение, затем удалите файл."
 }
