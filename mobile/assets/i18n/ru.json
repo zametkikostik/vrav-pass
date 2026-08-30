@@ -59,5 +59,18 @@
   "yandex_hint": "Яндекс.Диск WebDAV: https://webdav.yandex.ru — логин Яндекса и пароль приложения.",
   "export_json_extension": "Экспорт JSON для браузера",
   "export_json_ok": "JSON экспортирован",
-  "export_json_warning": "JSON содержит пароли в открытом виде. Только для разового импорта в расширение, затем удалите файл."
+  "export_json_warning": "JSON содержит пароли в открытом виде. Только для разового импорта в расширение, затем удалите файл.",
+  "generate_password": "Сгенерировать пароль",
+  "use_password": "Использовать",
+  "regenerate": "Обновить",
+  "length": "Длина",
+  "lowercase": "Строчные",
+  "uppercase": "Заглавные",
+  "digits": "Цифры",
+  "symbols": "Символы",
+  "entropy": "Энтропия",
+  "totp_secret": "Секрет TOTP (2FA)",
+  "totp_hint": "Base32 секрет из настройки аутентификатора",
+  "generate_totp_secret": "Сгенерировать секрет",
+  "totp_code": "Одноразовый код"
 }
