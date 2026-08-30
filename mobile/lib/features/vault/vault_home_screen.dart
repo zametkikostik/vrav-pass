@@ -12,6 +12,7 @@ import '../settings/sync_settings_screen.dart';
 import 'add_bookmark_screen.dart';
 import 'add_note_screen.dart';
 import 'add_password_screen.dart';
+import 'totp_code_widget.dart';
 
 class VaultHomeScreen extends ConsumerWidget {
   const VaultHomeScreen({super.key});
@@ -283,6 +284,8 @@ class _VaultItemTile extends ConsumerWidget {
       if (p.password != null)
         _copyRow(context, 'password'.tr(), p.password!, secret: true),
       if (p.url != null) _copyRow(context, 'url'.tr(), p.url!),
+      if (p.totpSecret != null && p.totpSecret!.isNotEmpty)
+        TotpCodeWidget(secret: p.totpSecret!),
       if (p.notes != null && p.notes!.isNotEmpty) ...[
         const SizedBox(height: 8),
         Text(p.notes!),
