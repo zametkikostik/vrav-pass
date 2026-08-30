@@ -13,5 +13,15 @@
   "unlock": "Unlock",
   "create_vault": "Create Vault",
   "master_password": "Master Password",
-  "confirm_password": "Confirm Password"
+  "confirm_password": "Confirm Password",
+  "create_vault_hint": "Choose a strong master password. It is never sent anywhere and cannot be recovered if forgotten.",
+  "create_vault_warning": "If you forget the master password, all data will be permanently lost.",
+  "password_too_short": "At least 8 characters",
+  "passwords_do_not_match": "Passwords do not match",
+  "enter_master_password": "Enter your master password",
+  "wrong_password": "Wrong master password",
+  "required": "Required",
+  "vault_unlocked": "Vault unlocked",
+  "vault_ready_hint": "Your keys are in memory. Next we will add encrypted local storage.",
+  "next_step_storage": "Next step: local encrypted storage + CRUD"
 }
